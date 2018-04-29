@@ -613,15 +613,21 @@ NAN_METHOD(Canvas::RegisterFont) {
   Local<String> family_prop = Nan::New<String>("family").ToLocalChecked();
   Local<String> weight_prop = Nan::New<String>("weight").ToLocalChecked();
   Local<String> style_prop = Nan::New<String>("style").ToLocalChecked();
+  Local<String> stretch_prop = Nan::New<String>("stretch").ToLocalChecked();
 
   char *family = str_value(js_user_desc->Get(family_prop), NULL, false);
   char *weight = str_value(js_user_desc->Get(weight_prop), "normal", true);
   char *style = str_value(js_user_desc->Get(style_prop), "normal", false);
+  char *stretch = str_value(js_user_desc->Get(stretch_prop), "normal", false);
 
   if (family && weight && style) {
     pango_font_description_set_weight(user_desc, Canvas::GetWeightFromCSSString(weight));
     pango_font_description_set_style(user_desc, Canvas::GetStyleFromCSSString(style));
     pango_font_description_set_family(user_desc, family);
+
+    if (stretch) {
+      pango_font_description_set_stretch(user_desc, Canvas::GetStretchFromCSSString(stretch));
+    }
 
     std::vector<FontFace>::iterator it = _font_face_list.begin();
     FontFace *already_registered = NULL;
@@ -732,6 +738,37 @@ Canvas::GetWeightFromCSSString(const char *weight) {
   }
 
   return w;
+}
+
+/*
+ * Get a PangoStretch from a CSS string (like "condensed")
+ */
+
+PangoStretch
+Canvas::GetStretchFromCSSString(const char *stretch) {
+  PangoStretch s = PANGO_STRETCH_NORMAL;
+
+  if (strlen(stretch) > 0) {
+    if (0 == strcmp("condensed", stretch)) {
+      s = PANGO_STRETCH_CONDENSED;
+    } else if (0 == strcmp("semi-condensed", stretch)) {
+      s = PANGO_STRETCH_SEMI_CONDENSED;
+    } else if (0 == strcmp("extra-condensed", stretch)) {
+      s = PANGO_STRETCH_EXTRA_CONDENSED;
+    } else if (0 == strcmp("ultra-condensed", stretch)) {
+      s = PANGO_STRETCH_ULTRA_CONDENSED;
+    } else if (0 == strcmp("expanded", stretch)) {
+      s = PANGO_STRETCH_EXPANDED;
+    } else if (0 == strcmp("semi-expanded", stretch)) {
+      s = PANGO_STRETCH_SEMI_EXPANDED;
+    } else if (0 == strcmp("extra-expanded", stretch)) {
+      s = PANGO_STRETCH_EXTRA_EXPANDED;
+    } else if (0 == strcmp("ultra-expanded", stretch)) {
+      s = PANGO_STRETCH_ULTRA_EXPANDED;
+    }
+  }
+
+  return s;
 }
 
 /*

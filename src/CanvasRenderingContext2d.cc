@@ -2164,6 +2164,7 @@ NAN_METHOD(Context2d::MoveTo) {
  * Set font:
  *   - weight
  *   - style
+ *   - stretch
  *   - size
  *   - unit
  *   - family
@@ -2173,15 +2174,17 @@ NAN_METHOD(Context2d::SetFont) {
   // Ignore invalid args
   if (!info[0]->IsString()
     || !info[1]->IsString()
-    || !info[2]->IsNumber()
-    || !info[3]->IsString()
-    || !info[4]->IsString()) return;
+    || !info[2]->IsString()
+    || !info[3]->IsNumber()
+    || !info[4]->IsString()
+    || !info[5]->IsString()) return;
 
   String::Utf8Value weight(info[0]);
   String::Utf8Value style(info[1]);
-  double size = info[2]->NumberValue();
-  String::Utf8Value unit(info[3]);
-  String::Utf8Value family(info[4]);
+  String::Utf8Value stretch(info[2]);
+  double size = info[3]->NumberValue();
+  String::Utf8Value unit(info[4]);
+  String::Utf8Value family(info[5]);
 
   Context2d *context = Nan::ObjectWrap::Unwrap<Context2d>(info.This());
 
@@ -2190,6 +2193,7 @@ NAN_METHOD(Context2d::SetFont) {
 
   pango_font_description_set_style(desc, Canvas::GetStyleFromCSSString(*style));
   pango_font_description_set_weight(desc, Canvas::GetWeightFromCSSString(*weight));
+  pango_font_description_set_stretch(desc, Canvas::GetStretchFromCSSString(*stretch));
 
   if (strlen(*family) > 0) pango_font_description_set_family(desc, *family);
 
